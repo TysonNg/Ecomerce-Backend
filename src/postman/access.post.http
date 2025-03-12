@@ -1,0 +1,13 @@
+@url_dev= http://localhost:3056/v1/api
+
+### signup
+
+POST {{url_dev}}/user/signup
+Content-Type: application/json
+x-api-key: c182e66ab8396c1b051fb61b7bd1cd174dbae6a3d86cb000635ef2e318081b501fa3ea30773e95f7327f7f8147e9982c7d525f3f183f0cc14426c44dadb8bfe6
+
+{
+    "name": "Minh Nhat 001",
+    "email": "tobaomoi@gmail.com",
+    "password": "minhnhat123"
+}
