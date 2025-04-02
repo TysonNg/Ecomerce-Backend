@@ -1,15 +1,16 @@
 'use strict'
-
+const express = require('express');
+const app = express()
 const userModel = require("../models/user.model")
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const { createKeyToken } = require("./keytoken.service")
 const { createTokenPair, verifyJWT } = require("../auth/authUtils")
 const { BadRequestError, ConflictRequestError, AuthFailureError, ForbiddenError} = require("../core/error.responese")
-const { getInfoData } = require("../utils")
+const { getInfoData, isValidEmail } = require("../utils")
 const { findByEmail } = require("./users.service")
 const KeyTokenService = require("./keytoken.service")
-const keytokenuserModel = require("../models/keytokenuser.model")
+const {keyTokenUserModel} = require("../models/keytokenuser.model")
 
 
 const roleUser = {
@@ -19,33 +20,37 @@ const roleUser = {
 
 class AsscessService {
     //LOGIN
-    static login = async ({email, password}) => {
+    static login = async ({email, password},res) => {
+        if(!isValidEmail(email)) throw new BadRequestError(`Error: Email not valid`)
         const foundUser = await findByEmail({email})
-        if(!foundUser) throw new BadRequestError('Error: User not registered')
-
-        const match = bcrypt.compare(password, foundUser.password);
+        
+        if(!foundUser) throw new BadRequestError(`Error: User not registered`)
+        console.log(`passWord ${password}, userPassWor ${foundUser.password}`);
+        
+        const match = await bcrypt.compare(password, foundUser.password);
         if(!match) throw new AuthFailureError('Authentication error')
 
             
         const {privateKey, publicKey} = crypto.generateKeyPairSync('rsa',{
-            modulusLength: 4096,
+            modulusLength: 2048,
             publicKeyEncoding:{
-                    type: 'spki',
-                    format: 'pem'
-                },
+                type: 'spki',
+                format: 'pem'
+            },
                 privateKeyEncoding:{
-                    type: 'pkcs8',
-                    format: 'pem',
-                }
-            })
-        
+                type: 'pkcs8',
+                format: 'pem',
+                
+            }
+        })
         const {_id: userId} = foundUser
         const tokens = await createTokenPair({userId,email},privateKey)
-        console.log('refreshToken', tokens.refreshToken);
+
         
         await KeyTokenService.createKeyToken({
+            accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
-            publicKey, userId
+            publicKey, userId,privateKey
         })
         
         return{
@@ -57,28 +62,36 @@ class AsscessService {
 
 
     //check this token used?
-    static handleRefreshToken = async({refreshToken,user,keyStore}) =>{
-        const {userId,email} = user;
-        if(keyStore.refreshTokenUsed.includes(refreshToken)){
+    static handleRefreshToken = async({refreshToken}) =>{
+        const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken)
+
+        if(foundToken) {
+            const {userId, email} = await verifyJWT(refreshToken, foundToken.privateKey)
             await KeyTokenService.deleteKeyByUserId(userId)
             throw new ForbiddenError('Something wrong happend!! Pls relogin')
-        }
 
-        if(keyStore.refreshToken !== refreshToken){
-            throw new AuthFailureError('user not registered')
         }
+        
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken)
+        if(!holderToken) throw new AuthFailureError('User not registed')
+
+        const {userId, email} = await verifyJWT(refreshToken, holderToken.privateKey)
 
         //check userId
         const foundUser = await findByEmail({email})
         if(!foundUser)  throw new AuthFailureError('user not registered')
 
+        console.log('3');
+
         //create token pair
-        const tokens = await createTokenPair({userId: foundUser._id,email},keyStore.publicKey,keyStore.privateKey)
-        
-        //update token        
-        await keytokenuserModel.updateOne(
+        const tokens = await createTokenPair({userId,email},holderToken.privateKey)
+        //update keyStore        
+        console.log('4');
+
+        await holderToken.updateOne(
             {
                 $set: {
+                    accessToken: tokens.accessToken,
                     refreshToken: tokens.refreshToken
                 },
                 $addToSet:{
@@ -86,15 +99,16 @@ class AsscessService {
                 }
             }
         )
+        console.log('5');
         return{
-            user,
+            user: {userId, email},
             tokens
         }
     }
 
     
     //LOGOUT
-    static logout = async (keyStore) => {
+    static logout = async (keyStore) => {  
         const delKey = await KeyTokenService.removeKeyById(keyStore._id)
         console.log({delKey});
         return delKey
@@ -103,6 +117,7 @@ class AsscessService {
     //SIGN UP
     static signUp = async({name,email,password}) =>{
         try {
+            if(!isValidEmail(email)) throw new BadRequestError(`Error: Email not valid`)
             const holderUser = await userModel.findOne({email}).lean();
             if(holderUser){
                 
@@ -128,22 +143,20 @@ class AsscessService {
                     }
                 })
 
-                console.log({privateKey,publicKey}); //save collection KeyStore
-                const keyStore = await createKeyToken({
-                    userId: newUser._id,
-                    publicKey
-                })
-                
-                if(!keyStore){
-                    throw new BadRequestError('Error::keyStore error')
-                }
+                const userId = newUser._id
                 //create token pair
-                const tokens = await createTokenPair({userId: newUser._id,email},keyStore,privateKey)
+                const tokens = await createTokenPair({userId: newUser._id,email},privateKey)
+
+                await KeyTokenService.createKeyToken({
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken,
+                    publicKey, userId,privateKey
+                })
 
                 return{
                     code:201,
                     metadata:{
-                        user: getInfoData({fieleds:['_id','email'],object: newUser}),
+                        user: getInfoData({fieleds:['_id','email','name'],object: newUser}),
                         tokens
                     }
                 }  
@@ -161,5 +174,4 @@ class AsscessService {
         }
     }
 }
-
 module.exports = AsscessService

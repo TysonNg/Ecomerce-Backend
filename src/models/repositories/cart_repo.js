@@ -1,5 +1,6 @@
 'use strict'
 
+const { Types } = require("mongoose")
 const { convertToObjectIdMongodb } = require("../../utils")
 const { cart } = require("../cart.model")
 const { product } = require("../product.model")
@@ -7,7 +8,9 @@ const { product } = require("../product.model")
 
 
 const findCartById = async(cartId) =>{
-    return await cart.findOne({_id: convertToObjectIdMongodb(cartId), cart_state: 'active'}).lean()
+    console.log('id', cartId);
+    
+    return await cart.findOne({cart_userId: cartId, cart_state: 'active'}).lean()
 }
 
 const createUserCart = async({userId, product}) => {
@@ -23,9 +26,7 @@ const createUserCart = async({userId, product}) => {
 
 const updateUserCartQuantity = async({userId, product}) => {
     const {productId, quantity} = product
-    console.log('productId', productId);
-    console.log(userId);
-    
+    console.log('quantity', quantity);
     const query = {
         cart_userId: userId,
         'cart_products.productId': productId,
@@ -41,8 +42,7 @@ const updateUserCartQuantity = async({userId, product}) => {
 
 
 const getProductById = async(productId) => {
-    
-    return await product.findOne({_id: convertToObjectIdMongodb(productId)}).lean()
+    return await product.findOne({_id: convertToObjectIdMongodb(productId) }).lean()
 }
 module.exports = {
     createUserCart,

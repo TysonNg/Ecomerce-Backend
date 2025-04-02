@@ -16,6 +16,14 @@ var keyTokenUserSchema = new Schema({
         type: String, 
         required: true
     },
+    privateKey:{
+        type: String, 
+        required: true
+    },
+    accessToken:{
+        type:String,
+        required: true
+    },
     refreshToken:{
         type:String, 
         required:true
@@ -30,4 +38,6 @@ var keyTokenUserSchema = new Schema({
 });
 
 //Export the model
-module.exports = mongoose.model(DOCUMENT_NAME, keyTokenUserSchema);
+module.exports = {
+    keyTokenUserModel: model(DOCUMENT_NAME, keyTokenUserSchema)
+}

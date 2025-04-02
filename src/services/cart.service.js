@@ -20,13 +20,14 @@ class CartService {
 
     static async addToCart({
         userId, product = {}
+
     }){
         //check cart exist?
-        const {productId, quantity} = product
+        const {productId,quantity} = product
+        
         const userCart = await cart.findOne({cart_userId: userId})
         if (!userCart){
             //create cart for User
-
             return await createUserCart({userId,product})
         }
 
@@ -37,13 +38,18 @@ class CartService {
         }
 
         const existItemOfCart = await cart.findOne({cart_userId: userId, 'cart_products.productId': productId})
+        console.log(existItemOfCart);
+        
         if(!existItemOfCart){
             userCart.cart_products.push(product)
             return await userCart.save()
         }
-
+        
+        
+        console.log(quantity);
+        
         // if cart exist and have product => update quantity
-        return await updateUserCartQuantity({userId, product: {productId,quantity: 1 }})
+        return await updateUserCartQuantity({userId, product: {productId,quantity }})
     }
 
     //update cart
@@ -56,8 +62,6 @@ class CartService {
                         item_products:[
                             {
                                 quantity,
-                                price
-                                shopId,
                                 old_quantity,
                                 productId
                             }
@@ -72,6 +76,8 @@ class CartService {
         console.log(shop_order_ids[0]?.item_products[0]);
         
         const {productId, quantity, old_quantity} = shop_order_ids[0]?.item_products[0]
+        console.log(`quantity ${quantity}, old_quantity ${old_quantity}`);
+        
         //check product exist?        
         const foundProduct = await getProductById(productId)
         
@@ -84,7 +90,7 @@ class CartService {
             //deleted product of cart
             return await CartService.deleteItemOfUserCart({userId,productId})
         }
-            
+        
         return await updateUserCartQuantity({userId, 
             product:{
                 productId,
@@ -94,6 +100,9 @@ class CartService {
 
 
     static async deleteItemOfUserCart({userId, productId}){
+        console.log(userId);
+        console.log(productId);
+        
         const query = {cart_userId: userId, cart_state : 'active'},
         updateSet = {
             $pull:{

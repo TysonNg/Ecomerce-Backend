@@ -3,8 +3,15 @@ const express = require("express");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const app = express();
-
+const cors = require('cors')
+const cookieParser= require('cookie-parser')
 // init middlewares
+app.use(cookieParser())
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}))
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
@@ -14,6 +21,12 @@ app.use(
     extended: true,
   })
 );
+
+app.get('/getCookie', (req,res) => {
+  console.log(req.cookies);
+  res.send('check cookie')
+})
+
 
 //init db
 require("./dbs/init.mongodb.cjs");

@@ -24,13 +24,28 @@ const findAllProducts = async({limit,sort,filter,page,select}) =>{
     .limit(limit)
     .select(getSelectData(select))
     .lean()
+    return products
+}
+
+const findProductsByCategory = async({limit,sort,category,page,select}) =>{
+    const skip = (page - 1) * limit;
+    const sortBy = sort === 'ctime' ? {_id: -1} : {_id: 1}
+    const products = await product.find({
+        isPublished: true,
+        product_type: category
+    })
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean()
 
     return products
 }
 
 //FIND PRODUCT
 const findProduct = async({product_id, unSelect})=>{
-    return await product.findById(product_id).select(unGetSelectData(unSelect))
+    return await product.findByIdAndUpdate(product_id,{$inc: {product_viewsCount: 1}},{upsert: true,new: true}).select(unGetSelectData(unSelect))
 }
 
 //UPDATE PRODUCT
@@ -93,11 +108,12 @@ const searchProductByUser = async({keySearch})=>{
 const checkProductByServer = async(products) => {
     return await Promise.all(products.map(async product => {
         const foundProduct = await getProductById(product.productId)
+        
         if(foundProduct){
             return{
                 price: foundProduct.product_price,
                 quantity: product.quantity <= foundProduct.product_quantity? product.quantity : new BadRequestError("Don't have enought quantity"),
-                producId: foundProduct._id
+                productId: foundProduct._id.toString()
             }
         }
     }))
@@ -111,7 +127,8 @@ module.exports ={
     unPublishProductByShop,
     searchProductByUser,
     findAllProducts,
+    findProductsByCategory,
     findProduct,
     updateProductById,
-    checkProductByServer    
+    checkProductByServer 
 }

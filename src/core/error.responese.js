@@ -8,7 +8,7 @@ const StatusCode ={
 }
 
 const ReasonStatusCode = {
-    FORBIDDEN: 'Bad request error',
+    BADREQUEST: 'Bad request error',
     CONFLICT: 'Conflict error',
     AUTHFAILURE: 'Auth error',
     NOTFOUND: 'NotFound Error',
@@ -31,7 +31,7 @@ class ConflictRequestError extends ErrorResponse{
 }
 
 class BadRequestError extends ErrorResponse{
-    constructor(message= ReasonStatusCode.FORBIDDEN,statusCode = StatusCode.FORBIDDEN){
+    constructor(message= ReasonStatusCode.BADREQUEST,statusCode = StatusCode.FORBIDDEN){
         super(message,statusCode)
     }
 }
