@@ -44,6 +44,7 @@ class ProductController {
             }),
         }).send(res);
     }
+
   //QUERY//
   /**
    * @desc Get all drafts for shop
@@ -84,6 +85,21 @@ class ProductController {
     }).send(res);
   };
  
+  getAllProductsByCategory = async(req,res,next) => {
+    new SuccessResponse({
+      message: "Get list getAllProductsByCategory success!",
+      metadata: await ProductServices.findProductsByCategory(req.query),
+    }).send(res);
+  }
+
+  getProductsByViewsCount = async(req,res,next) => {
+    new SuccessResponse({
+      message: "Get list getProductsByViewsCount success!",
+      metadata: await ProductServices.sortProductByViewsCount(),
+    }).send(res);
+  }
+
+  
   getProduct = async (req, res, next) => {
     new SuccessResponse({
       message: "Get list getProduct success!",
@@ -92,6 +108,13 @@ class ProductController {
       },
     )}).send(res);
   };
+
+  getHotDealProducts = async(req,res,next) => {
+    new SuccessResponse({
+      message: "Get list getHotDealProducts success!",
+      metadata: await ProductServices.hotDealProducts(
+    )}).send(res);
+  }
   //END QUERY//
 
   

@@ -11,6 +11,22 @@ class checkoutController {
             metadata: await CheckoutService.checkoutReview(req.body)
         }).send(res)
     }
+
+    handleOrder = async(req,res,next) => {
+        new SuccessResponse({
+            message: 'Successfull handleOrder!',
+            metadata: await CheckoutService.orderByUser(req.body)
+        }).send(res)
+    }
+
+    getOrdersByUser = async(req,res,next) => {
+        new SuccessResponse({
+            message: 'Successfull getOrdersByUser',
+            metadata: await CheckoutService.getOrdersByUser({
+                order_userId: req.user.userId
+            })
+        }).send(res)
+    }
 }
 
 module.exports = new checkoutController();

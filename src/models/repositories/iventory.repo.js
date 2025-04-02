@@ -1,14 +1,13 @@
 'use strict'
 
 const { convertToObjectIdMongodb } = require("../../utils")
-const inventoryModel = require("../inventory.model")
-const {Types} = require('mongoose')
+const {inventory} = require("../inventory.model")
 
 const insertInventory = async({
     productId, shopId, stock, location = 'unKnown'
 }) => {
 
-    return await inventoryModel.create({
+    return await inventory.create({
         inven_productId: productId,
         inven_shopId: shopId,
         inven_stock: stock,
@@ -33,7 +32,7 @@ const reservationInventory = async ({productId, quantity, cartId}) =>{
         }
     }, options= {upsert: true, new: true}
 
-    return await inventoryModel.updateOne(query,updateSet,options)
+    return await inventory.updateOne(query,updateSet,options)
 }
 
 module.exports = {

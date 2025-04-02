@@ -1,5 +1,4 @@
 "use strict";
-
 const redis = require('redis');
 const {
   reservationInventory,
@@ -7,29 +6,40 @@ const {
 const { BadRequestError } = require("../core/error.responese");
 const {promisify} = require ('util')
 
-const redisClient = redis.createClient();
+const redisClient = redis.createClient({
+  host: "127.0.0.1",
+  port: 6379
+});
+redisClient.on("connect", () => console.log("Connected to redis successfully!"));
 
-redisClient.on("error", (err) => new BadRequestError("Error", err));
+redisClient.on("error", (err) => console.log(err));
+;
 
 
 const pexpire = promisify(redisClient.pexpire).bind(redisClient)
 const setnxAsync = promisify(redisClient.setnx).bind(redisClient)
 
-const accquireLock = async ({ productId, quantity, cartId }) => {
+const accquireLock = async ( productId, quantity, cartId ) => {
   const key = `lock_v2025_${productId}`;
+  
   const retryTimes = 10;
   const expireTime = 3000; //3 seconds tam lock
 
   for (let i = 0; i < retryTimes; i++) {
     //create 1 key
-    const result = await setnxAsync(key, expireTime);
+    console.log('i', i);
+    
+    const result = await setnxAsync(key, 'locked');
     console.log(`result::`, result);
-    if (result === true) {
+    if (result === 1) {
+      await pexpire(key,expireTime)
       const isReversation = await reservationInventory({
         productId,
         quantity,
         cartId,
       });
+      // console.log('reversation', isReversation);
+      
       if (isReversation.modifiedCount) {
         await pexpire(key, expireTime);
         return key;
@@ -42,8 +52,13 @@ const accquireLock = async ({ productId, quantity, cartId }) => {
 };
 
 const releaseLock = async (keyLock) => {
-  const delAsyncKey = redisClient.del();
-  return await delAsyncKey(keyLock);
+  console.log('key ne', keyLock);
+  try {
+    return await redisClient.del(keyLock)
+  } catch (error) {
+    console.log("error when delete Key", error);
+    
+  }
 };
 
 module.exports = {

@@ -19,9 +19,11 @@ class Database {
     if (1 === 1) {
       mongoose.set("debug", true);
       mongoose.set("debug", { color: true });
+
     }
     mongoose.connect(connectString)
-      .then(()=> console.log(`Connected Mongodb Success`, countConnect()))
+    
+      .then(()=>  console.log(`Connected Mongodb Success`, countConnect()))
       .catch((err) => console.log(`Error connect!`, err))
 
   }
@@ -30,7 +32,6 @@ class Database {
     if (!Database.instance) {
       Database.instance = new Database();
     }
-
     return Database.instance;
   }
 }

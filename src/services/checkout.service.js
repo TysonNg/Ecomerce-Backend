@@ -6,6 +6,8 @@ const { checkProductByServer } = require("../models/repositories/product.repo")
 const { getDiscountAmount } = require("./discount.service")
 const { accquireLock, releaseLock } = require("./redis.service")
 const {order} = require('../models/order.model')
+const { cart } = require("../models/cart.model")
+const { getOrdersId } = require("../models/repositories/order_repo")
 class CheckoutService{
     //check login and without login
     /*
@@ -30,15 +32,18 @@ class CheckoutService{
 
     static async checkoutReview({cartId, userId, shop_order_ids = []}) {
         //check cartId
+
         const foundCart = await findCartById(cartId)
-        if(!foundCart) throw NotFoundError('Cart does not exist!')
+        
+        if(!foundCart) throw new NotFoundError('Cart does not exist!')
         const checkout_order = {
             totalPrice: 0, // total price of order
             feeShip: 0, //fee 
             totalDiscount: 0, //total reduce by discount
             totalCheckout: 0 
         }, shop_order_ids_new = []
-
+        
+        
         for (let i = 0; i < shop_order_ids.length; i++) {
             const {shopId, shop_discount = [], item_products = []} = shop_order_ids[i]
             //check product available
@@ -65,6 +70,7 @@ class CheckoutService{
                     codeId: shop_discount[0].codeId,
                     userId,
                     shopId,
+                    isCheckout: true,
                     products: checkProductServer
                 })
                 //total discount
@@ -100,21 +106,27 @@ class CheckoutService{
             userId,
             shop_order_ids
         })
-
+        
         // check once quantity's product of cart
         //get new array Products
         const products = shop_order_ids_new.flatMap(order => order.item_products)
         console.log(`[1]:`, products);
         const accquireProduct = []
         for (let i = 0; i < products.length; i++) {
+            
+            
             const {productId,quantity} = products[i]
             const keyLock = await accquireLock(productId, quantity, cartId)
+            console.log('keylock', keyLock);
+            
             accquireProduct.push(keyLock? true : false)
             if(keyLock){
                 await releaseLock(keyLock)
+                console.log('co');
+                
             }
         }
-
+        
         //check if 1 product outstock in inventory
         if (accquireProduct.includes(false)) {
             throw new BadRequestError('Few product be updated. Pls check again cart')
@@ -123,23 +135,28 @@ class CheckoutService{
         const newOrder = await order.create({
             order_userId: userId,
             order_checkout: checkout_order,
-            orrder_shipping: user_address,
+            order_shipping: user_address,
             order_payment: user_payment,
-            order_products: products
+            order_products: products,
+            order_trackingNumber: `#0000${Date.now()}2025`
         })
 
         //Case: if insert successfully => remove product of cart
         if(newOrder){
             //remove product in my cart
-            
+            await cart.findOneAndUpdate({cart_userId: cartId, cart_state: 'active'}, {$set: {cart_products: []}}, {new: true, upsert: true})
+           
         }
         return newOrder
         
     }
 
     //Querry Order
-    static async getOrdersByUser() {
-
+    static async getOrdersByUser({order_userId}) {
+        if(!order_userId){
+            throw new BadRequestError('Pls relogin!')
+        }
+        return await getOrdersId({order_userId})
     }
 
     //Query Order Using Id [Users]

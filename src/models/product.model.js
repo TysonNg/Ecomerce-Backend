@@ -14,6 +14,10 @@ const productSchema = new Schema({
     required: true,
     index:true //ao gucci
   },
+  product_prevPrice: {
+    type:Number,
+    default:null
+  },
   product_price: {
     type: Number,
     required: true,
@@ -21,7 +25,7 @@ const productSchema = new Schema({
   product_type: {
     type: String,
     required: true,
-    enum:['Clothing','Electronics','Jewelrys']
+    enum:['clothing','electronics','jewelrys','homeAppliances','kitchenAppliances','audioVideo','laptop','gadget','others']
   },
   product_description: {
     type: String,
@@ -31,6 +35,15 @@ const productSchema = new Schema({
   product_thumb: {
     type: String,
     required: true
+  },
+  product_images: {
+    type: Array,
+    default: [],
+    required: true
+  },
+  product_viewsCount: {
+    type: Number,
+    default: 0
   },
   product_slug: String, //ao-gucci
   product_quantity: {
@@ -94,13 +107,100 @@ const electronicSchema = new Schema({
   timestamps: true
 })
 
-// define the product type = Wardrobe
+// define the product type = Jewelry
 const jewelrySchema = new Schema({
   brand:{type: String, required: true},
-  size: String,
+  model: String,
   material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
 },{
   collection: 'jewelrys',
+  timestamps: true
+})
+
+// define the product type = homeAppliances
+const homeAppliancesSchema = new Schema({
+  brand:{type: String, required: true},
+  model: String,
+  material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+},{
+  collection: 'homeAppliances',
+  timestamps: true
+})
+
+// define the product type = kitchenApliances
+const kitchenAppliancesSchema = new Schema({
+  brand:{type: String, required: true},
+  model: String,
+  material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+},{
+  collection: 'kitchenAppliances',
+  timestamps: true
+})
+
+// define the product type = kitchenApliances
+const laptopSchema = new Schema({
+  brand:{type: String, required: true},
+  model: String,
+  material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+},{
+  collection: 'laptop',
+  timestamps: true
+})
+
+// define the product type = kitchenApliances
+const audioVideoSchema = new Schema({
+  brand:{type: String, required: true},
+  model: String,
+  material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+},{
+  collection: 'audioVideo',
+  timestamps: true
+})
+
+const gadgetSchema = new Schema({
+  brand:{type: String, required: true},
+  model: String,
+  material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+},{
+  collection: 'audioVideo',
+  timestamps: true
+})
+
+
+const otherSchema = new Schema({
+  brand:{type: String, required: true},
+  model: String,
+  material: String,
+  product_shop:{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+},{
+  collection: 'others',
   timestamps: true
 })
 
@@ -110,5 +210,11 @@ module.exports = {
  product: model(DOCUMENT_NAME, productSchema),
  clothing: model('clothing', clothingSchema),
  electronics: model('electronics', electronicSchema),
- jewelry: model('jewelry', jewelrySchema)
+ jewelry: model('jewelry', jewelrySchema),
+ kitchenApliances: model('kitchenAppliances', kitchenAppliancesSchema),
+ homeAppliances: model('homeAppliances',homeAppliancesSchema),
+ audioVideo: model('audioVideo', audioVideoSchema),
+ laptop: model('laptop', laptopSchema),
+ others: model('others', otherSchema),
+ gadget: model('gadget', gadgetSchema)
 };

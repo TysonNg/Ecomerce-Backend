@@ -1,24 +1,28 @@
 "use strict";
 
 const { Types, isValidObjectId, Schema } = require("mongoose");
-const keytokenuserModel = require("../models/keytokenuser.model");
+const {keyTokenUserModel} = require("../models/keytokenuser.model");
 
 class KeyTokenService {
   static createKeyToken = async ({
+    accessToken,
+    privateKey,
     userId,
     publicKey,
     refreshToken,
   }) => {
-    try {
+    try {      
       const filter = { userId },
         update = {
+          accessToken,
+          privateKey,
           publicKey,
           refreshTokenUsed: [],
           refreshToken,
         },
         options = { upsert: true, new: true };
 
-      const tokens = await keytokenuserModel.findOneAndUpdate(
+      const tokens = await keyTokenUserModel.findOneAndUpdate(
         filter,
         update,
         options
@@ -30,23 +34,23 @@ class KeyTokenService {
   };
 
   static findByUserId = async (userId) => {
-    return await keytokenuserModel.findOne({userId: new Types.ObjectId(`${userId}`)}).lean();
+    return await keyTokenUserModel.findOne({userId: new Types.ObjectId(`${userId}`)}).lean();
   };
   // {userId: Types.ObjectId.createFromHexString(id)}
   static removeKeyById = async (id) => {
-    return await keytokenuserModel.findByIdAndDelete(id);
+    return await keyTokenUserModel.findByIdAndDelete(id);
   };
 
   static findByRefreshTokenUsed = async (refreshToken) => {
-    return await keytokenuserModel.findOne({refreshTokenUsed: refreshToken}).lean();
+    return await keyTokenUserModel.findOne({refreshTokenUsed: refreshToken}).lean();
   };
 
   static findByRefreshToken = async (refreshToken ) => {
-    return await keytokenuserModel.findOne({refreshToken}).lean();
+    return await keyTokenUserModel.findOne({refreshToken});
   };
 
   static deleteKeyByUserId = async (userId) => {
-    return await keytokenuserModel.findOneAndDelete({userId: new Types.ObjectId(`${userId}`)});
+    return await keyTokenUserModel.findOneAndDelete({userId: new Types.ObjectId(`${userId}`)});
   }
 }
 module.exports = KeyTokenService;

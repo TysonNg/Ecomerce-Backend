@@ -11,7 +11,7 @@ const checkDiscountExist = async({model,filter}) =>{
     console.log(filter);
     
     
-    return await model.findOne(filter).lean()
+    return await model.findOne(filter)
 }
 
 const findAllDiscountCodeUnselect = async({
@@ -26,7 +26,8 @@ const findAllDiscountCodeUnselect = async({
         .limit(limit)
         .select(unGetSelectData(unselect))
         .lean()
-    
+        console.log('document',documents);
+        
         return documents
 }
 
@@ -50,7 +51,8 @@ const isProductOfDiscount = async ({
     discount_product_ids, products
 }) => { 
        for(const product of products){
-            if(!(discount_product_ids.includes(product.productId))){
+        
+            if(!(discount_product_ids.includes(product.productId.toString()))){
                 return false
           }
         }

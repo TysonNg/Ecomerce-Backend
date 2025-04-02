@@ -26,6 +26,6 @@ router.use(`${rootUrl}/cart`, require('./cart'))
 router.use(`${rootUrl}/checkout`, require('./checkout'))
 
 //inventory
-router.use(`${rootUrl}/checkout`, require('./inventory'))
+router.use(`${rootUrl}/inventory`, require('./inventory'))
 
 module.exports = router

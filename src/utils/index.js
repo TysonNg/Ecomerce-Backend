@@ -5,6 +5,7 @@ const {Types} = require('mongoose')
 
 const convertToObjectIdMongodb = id => new Types.ObjectId(`${id}`)
 
+
 const getInfoData = ({fieleds = [], object={}}) => {
     return _.pick(object,fieleds)
 }
@@ -42,6 +43,10 @@ const updateNestedObjectParser = (obj) =>{
 }
 
 
+const isValidEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
 
 module.exports = {
     getInfoData,
@@ -49,6 +54,7 @@ module.exports = {
     unGetSelectData,
     removeUndefinedObject,
     updateNestedObjectParser,
-    convertToObjectIdMongodb
+    convertToObjectIdMongodb,
+    isValidEmail
 }
 
