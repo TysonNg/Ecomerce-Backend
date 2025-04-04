@@ -29,13 +29,13 @@ app.get('/getCookie', (req,res) => {
 
 
 //init db
-require("./dbs/init.mongodb.cjs");
-const { checkOverLoad } = require("./helpers/check.connect");
+require("../src/dbs/init.mongodb.cjs");
+const { checkOverLoad } = require("../src/helpers/check.connect");
 checkOverLoad();
 
 //init router
 
-app.use("/", require("./routes"));
+app.use("/", require("../src/routes"));
 
 //handling err
 app.use((req, res, next) => {
