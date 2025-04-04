@@ -11,10 +11,8 @@ app.use(cookieParser())
 const corsConfig = {
   orgin: "*",
   credetial: true,
-  methods: ["GET","POST", "PUT", "DELETE"],
-  
 }
-app.options("", cors(corsConfig))
+
 app.use(cors(corsConfig))
 app.use(morgan("dev"));
 app.use(helmet());
