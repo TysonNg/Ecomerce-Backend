@@ -1,10 +1,9 @@
 "use strict";
-const AsscessService = require("../services/access.service.js");
 const express = require('express');
 const JWT = require("jsonwebtoken");
 const asyncHandler = require('express-async-handler')
 const cookieParser = require('cookie-parser');
-const { AuthFailureError, NotFoundError, ForbiddenError } = require('../core/error.responese');
+const { AuthFailureError, NotFoundError } = require('../core/error.responese');
 const { findByUserId } = require('../services/keytoken.service');
 const app = express()
 app.use(cookieParser())
@@ -22,7 +21,9 @@ const HEADER = {
 
 const apiKey = async (req,res,next) => {
     try {
-        const key = req.headers[HEADER.API_KEY]?.toString()
+        // const key = req.headers[HEADER.API_KEY]?.toString()
+        const key = process.env.X_API_KEY;
+        
         if(!key){
             return res.status(403).json({
                 message: 'Forbidden Error'
