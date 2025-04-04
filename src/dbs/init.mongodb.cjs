@@ -1,16 +1,15 @@
 "use strict";
 
 require('dotenv').config()
-// const config = require('../config/config.mongodb')
+const config = require('../config/config.mongodb')
 const mongoose = require("mongoose");
 const {countConnect} = require('../helpers/check.connect')
 
-// console.log('CONFIG', config);
+console.log('CONFIG', config);
 
-// const {db} = config
-// const {userName, pass, name } = db
-// const connectString = `mongodb+srv://${userName}:${pass}@${name}.t8agq.mongodb.net/`;
-const connectString = `mongodb+srv://imminhat:minhnhat9930306@furniture.t8agq.mongodb.net/`;
+const {db} = config
+const {userName, pass, name } = db
+const connectString = `mongodb+srv://${userName}:${pass}@${name}.t8agq.mongodb.net/`;
 
 console.log(`connect string: ${connectString}`);
 
