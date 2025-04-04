@@ -9,7 +9,7 @@ const {countConnect} = require('../helpers/check.connect')
 // const connectString = `mongodb+srv://${userName}:${pass}@${name}.t8agq.mongodb.net/`;
 const connectString = process.env.MONGODB_URI;
 
-// console.log(`connect string: ${connectString}`);
+console.log(`connect string: ${connectString}`);
 
 
 class Database {

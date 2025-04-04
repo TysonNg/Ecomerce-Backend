@@ -23,8 +23,8 @@ const HEADER = {
 
 const apiKey = async (req,res,next) => {
     try {
-        // const key = req.headers[HEADER.API_KEY]?.toString()
-        const key = process.env.X_API_KEY;
+        const key = req.headers[HEADER.API_KEY]?.toString()
+        // const key = process.env.X_API_KEY;
         
         if(!key){
             return res.status(403).json({

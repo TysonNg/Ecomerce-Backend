@@ -7,6 +7,10 @@ const findById = async(key) => {
     // console.log(newKey);
     
     const objKey = await apiKeyModel.findOne({key, status: true}).lean()
+    console.log(key);
+    
+    console.log('objKey', objKey);
+    
     return objKey
 }
 
