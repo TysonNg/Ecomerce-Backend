@@ -21,7 +21,7 @@ class KeyTokenService {
           refreshToken,
         },
         options = { upsert: true, new: true };
-        console.log('hi');
+        
         
       const tokens = await keyTokenUserModel.findOneAndUpdate(
         filter,
