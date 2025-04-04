@@ -4,7 +4,7 @@ const JWT = require("jsonwebtoken");
 const asyncHandler = require('express-async-handler')
 const cookieParser = require('cookie-parser');
 const { AuthFailureError, NotFoundError } = require('../core/error.responese');
-const { findByUserId } = require('../services/keytoken.service');
+const { findByUserId } = require('../services/keytoken.service.js');
 const app = express()
 app.use(cookieParser())
 
