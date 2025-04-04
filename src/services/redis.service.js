@@ -1,15 +1,18 @@
 "use strict";
-const redis = require('redis');
+// const redis = require('redis');
+
+// const redisClient = redis.createClient({
+//   host: "127.0.0.1",
+//   port: 6379
+// });
+require('dotenv').config()
 const {
   reservationInventory,
 } = require("../models/repositories/iventory.repo");
-const { BadRequestError } = require("../core/error.responese");
 const {promisify} = require ('util')
+const Redis = require('ioredis')
 
-const redisClient = redis.createClient({
-  host: "127.0.0.1",
-  port: 6379
-});
+const redisClient = new Redis(process.env.REDIS_URL)
 redisClient.on("connect", () => console.log("Connected to redis successfully!"));
 
 redisClient.on("error", (err) => console.log(err));
