@@ -1,13 +1,13 @@
 "use strict";
 
 require('dotenv').config()
-// const {db: {userName, pass, name}} = require('../config/config.mongodb')
+const {db: {userName, pass, name}} = require('../config/config.mongodb')
 const mongoose = require("mongoose");
 const {countConnect} = require('../helpers/check.connect')
 
 
 // const connectString = `mongodb+srv://${userName}:${pass}@${name}.t8agq.mongodb.net/`;
-const connectString = `mongodb+srv://vercel-admin-user:qvlLQMSIvRWoRqko@furniture.t8agq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const connectString = process.env.MONGODB_URI;
 
 console.log(`connect string: ${connectString}`);
 
