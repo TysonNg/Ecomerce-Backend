@@ -8,7 +8,13 @@ const cookieParser= require('cookie-parser')
 // init middlewares
 app.use(cookieParser())
 
-app.use(cors())
+const corsConfig = {
+  orgin: "*",
+  credetial: true,
+  methods: ["GET","POST", "PUT", "DELETE"],
+  
+}
+app.use(cors(corsConfig))
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
