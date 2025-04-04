@@ -1,16 +1,15 @@
 'use strict'
 const express = require('express');
 const app = express()
-const userModel = require("../models/user.model")
+const userModel = require("../models/user.model.js")
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
-const { createKeyToken } = require("./keytoken.service")
+const { createKeyToken } = require("./keytoken.service.js")
 const { createTokenPair, verifyJWT } = require("../auth/authUtils")
 const { BadRequestError, ConflictRequestError, AuthFailureError, ForbiddenError} = require("../core/error.responese")
 const { getInfoData, isValidEmail } = require("../utils")
-const { findByEmail } = require("./users.service")
-const KeyTokenService = require("./keytoken.service")
-const {keyTokenUserModel} = require("../models/keytokenuser.model")
+const { findByEmail } = require("./users.service.js")
+const KeyTokenService = require("./keytoken.service.js")
 
 
 const roleUser = {

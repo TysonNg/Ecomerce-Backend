@@ -1,6 +1,6 @@
 const app = require("./api");
 
-const PORT = process.env.PORT || 3056
+const PORT = process.env.PORT || 3055
 
 const server = app.listen(PORT, () => {
     console.log(`WSV eComerce start with port ${PORT}`);
