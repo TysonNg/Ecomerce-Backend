@@ -1,6 +1,6 @@
 "use strict";
 
-const { Types, isValidObjectId, Schema } = require("mongoose");
+const { Types } = require("mongoose");
 const {keyTokenUserModel} = require("../models/keytokenuser.model");
 
 class KeyTokenService {
