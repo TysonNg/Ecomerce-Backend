@@ -1,7 +1,7 @@
 "use strict";
 
 require('dotenv').config()
-const {db: {userName, pass, name}} = require('../config/config.mongodb')
+// const {db: {userName, pass, name}} = require('../config/config.mongodb')
 const mongoose = require("mongoose");
 const {countConnect} = require('../helpers/check.connect')
 
