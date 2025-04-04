@@ -1,10 +1,12 @@
 "use strict";
 
 require('dotenv').config()
-const {db: {userName, pass, name}} = require('../config/config.mongodb')
+const config = require('../config/config.mongodb')
 const mongoose = require("mongoose");
 const {countConnect} = require('../helpers/check.connect')
 
+const {db} = config
+const {userName, pass, name } = db
 const connectString = `mongodb+srv://${userName}:${pass}@${name}.t8agq.mongodb.net/`;
 console.log(`connect string: ${connectString}`);
 
