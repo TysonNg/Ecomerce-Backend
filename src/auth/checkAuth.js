@@ -5,6 +5,8 @@ const asyncHandler = require('express-async-handler')
 const cookieParser = require('cookie-parser');
 const { AuthFailureError, NotFoundError } = require('../core/error.responese');
 const { findByUserId } = require('../services/keytoken.service.js');
+require('dotenv').config()
+
 const app = express()
 app.use(cookieParser())
 
