@@ -122,8 +122,6 @@ class CheckoutService{
             accquireProduct.push(keyLock? true : false)
             if(keyLock){
                 await releaseLock(keyLock)
-                console.log('co');
-                
             }
         }
         

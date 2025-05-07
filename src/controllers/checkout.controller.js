@@ -1,6 +1,6 @@
 "use strict";
 
-const {OK,CREATED,SuccessResponse} = require('../core/success.response');
+const {SuccessResponse} = require('../core/success.response');
 const CheckoutService = require('../services/checkout.service');
 
 class checkoutController {

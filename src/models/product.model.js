@@ -49,7 +49,7 @@ const productSchema = new Schema({
   product_quantity: {
     type: Number,
     required: true,
-    default: 1,
+    default: 0,
   },
   product_shop:{
     type: Schema.Types.ObjectId, ref: 'User'

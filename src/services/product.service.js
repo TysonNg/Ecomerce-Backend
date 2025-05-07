@@ -378,9 +378,9 @@ class Gadget extends Product{
 class Others extends Product{
     async createProduct(){
         const newOther = await others.create(this.product_attributes)
-        if(!newOther) throw new BadRequestError('Create new clothing error')
+        if(!newOther) throw new BadRequestError('Create new other error')
         const newProduct = await super.createProduct(newOther._id)
-        if(!newProduct) throw new BadRequestError('Create new newProduct error')
+        if(!newProduct) throw new BadRequestError('Create new other error')
 
         return newProduct
     }
