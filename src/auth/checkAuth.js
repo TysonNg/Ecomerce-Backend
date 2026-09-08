@@ -5,6 +5,7 @@ const asyncHandler = require('express-async-handler')
 const cookieParser = require('cookie-parser');
 const { AuthFailureError, NotFoundError } = require('../core/error.responese');
 const { findByUserId } = require('../services/keytoken.service.js');
+const { isObjectIdOrHexString } = require('mongoose');
 require('dotenv').config()
 
 const app = express()
@@ -42,6 +43,7 @@ const apiKey = async (req,res,next) => {
         
         return next()
     } catch (error) {
+        next(error)
     }
 };
 
@@ -71,15 +73,13 @@ const authentication = asyncHandler(async(req,res,next)=>{
   //check userId missing?    
   const userId = req.headers[HEADER.CLIENT_ID]
   
-  if (!userId) throw new AuthFailureError('Invalid Request')
-    console.log(`userId:: ${userId}`);
+  if (!isObjectIdOrHexString(userId)) throw new AuthFailureError('Invalid Request')
   
   //KeyStore
   const keyStore = await findByUserId(userId)
-  console.log(`keystore:: ${keyStore}`);
   
   if(!keyStore){
-    throw new NotFoundError('Not Found KeyStore')
+    throw new AuthFailureError('Session expired. Please sign in again')
   }
   const accessToken = req.headers[HEADER.AUTHORIZATION]
 
@@ -87,7 +87,6 @@ const authentication = asyncHandler(async(req,res,next)=>{
   
   try {
     const decodeUser = JWT.verify(accessToken,keyStore.publicKey)
-    console.log(`decodeUserID::${decodeUser.userId}`);
       
     if(userId !== decodeUser.userId){
       throw new AuthFailureError('Auth error')
@@ -97,6 +96,12 @@ const authentication = asyncHandler(async(req,res,next)=>{
     req.accessToken = req.headers[HEADER.AUTHORIZATION] 
     return next()
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      throw new AuthFailureError('ACCESS_TOKEN_EXPIRED');
+    }
+    if (error.name === 'JsonWebTokenError' || error.name === 'NotBeforeError') {
+      throw new AuthFailureError('Invalid access token');
+    }
     throw error
   }
 })

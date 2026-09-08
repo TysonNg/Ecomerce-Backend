@@ -5,6 +5,7 @@ const {product,electronics,clothing,jewelry} = require('../../models/product.mod
 const {getSelectData, unGetSelectData} = require('../../utils/index')
 const { getProductById } = require('./cart_repo')
 const { BadRequestError } = require('../../core/error.responese')
+const { buildShopOwnedProductQuery } = require('../../services/seller-ownership.service')
 
 //QUERY
 const findAllDraftsForShop = async({query,limit,skip}) =>{
@@ -49,8 +50,9 @@ const findProduct = async({product_id, unSelect})=>{
 }
 
 //UPDATE PRODUCT
-const updateProductById = async({productId, objectParams, model, isNew = true}) =>{
-    return await model.findByIdAndUpdate( productId, {$set: objectParams} ,
+const updateProductById = async({productId, objectParams, model, productShop, isNew = true}) =>{
+    const query = productShop ? buildShopOwnedProductQuery({ productId, shopId: productShop }) : { _id: productId }
+    return await model.findOneAndUpdate( query, {$set: objectParams} ,
         {new: isNew}
     )
 }

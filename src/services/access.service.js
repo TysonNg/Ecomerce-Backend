@@ -24,7 +24,6 @@ class AsscessService {
         const foundUser = await findByEmail({email})
         
         if(!foundUser) throw new BadRequestError(`Error: User not registered`)
-        console.log(`passWord ${password}, userPassWor ${foundUser.password}`);
         
         const match = await bcrypt.compare(password, foundUser.password);
         if(!match) throw new AuthFailureError('Authentication error')

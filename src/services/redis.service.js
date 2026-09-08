@@ -1,66 +1,94 @@
 "use strict";
-// const redis = require('redis');
 
-// const redisClient = redis.createClient({
-//   host: "127.0.0.1",
-//   port: 6379
-// });
-require('dotenv').config()
+require('dotenv').config();
 const {
   reservationInventory,
 } = require("../models/repositories/iventory.repo");
-const {promisify} = require ('util')
-const Redis = require('ioredis')
+const Redis = require('ioredis');
 
-const redisClient = new Redis(process.env.REDIS_URL)
-redisClient.on("connect", () => console.log("Connected to redis successfully!"));
+let redisClient = null;
 
-redisClient.on("error", (err) => console.log(err));
-;
+try {
+  if (process.env.REDIS_URL) {
+    redisClient = new Redis(process.env.REDIS_URL, {
+      connectTimeout: 2000,
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      retryStrategy: (times) => {
+        if (times > 3) return null; // stop retry if server is down
+        return Math.min(times * 200, 1000);
+      },
+    });
 
+    redisClient.on("connect", () =>
+      console.log("Connected to redis successfully!")
+    );
 
-const pexpire = promisify(redisClient.pexpire).bind(redisClient)
-const setnxAsync = promisify(redisClient.setnx).bind(redisClient)
+    redisClient.on("error", (err) =>
+      console.log("Redis warning (falling back gracefully):", err.message)
+    );
+  }
+} catch (error) {
+  console.log("Redis client init failed:", error.message);
+}
 
-const accquireLock = async ( productId, quantity, cartId ) => {
+const accquireLock = async (productId, quantity, cartId) => {
   const key = `lock_v2025_${productId}`;
-  
+  const expireTime = 3000; // 3 seconds lock
   const retryTimes = 10;
-  const expireTime = 3000; //3 seconds tam lock
 
-  for (let i = 0; i < retryTimes; i++) {
-    //create 1 key
-    console.log('i', i);
-    
-    const result = await setnxAsync(key, 'locked');
-    console.log(`result::`, result);
-    if (result === 1) {
-      await pexpire(key,expireTime)
-      const isReversation = await reservationInventory({
-        productId,
-        quantity,
-        cartId,
-      });
-      // console.log('reversation', isReversation);
-      
-      if (isReversation.modifiedCount) {
-        await pexpire(key, expireTime);
-        return key;
+  // 1. If Redis is online and ready, try to acquire distributed lock
+  if (redisClient && redisClient.status === "ready") {
+    for (let i = 0; i < retryTimes; i++) {
+      try {
+        const result = await redisClient.set(key, "locked", "PX", expireTime, "NX");
+        if (result === "OK") {
+          const isReservation = await reservationInventory({
+            productId,
+            quantity,
+            cartId,
+          });
+
+          if (isReservation && isReservation.modifiedCount) {
+            return key;
+          }
+          await redisClient.del(key);
+          return null;
+        }
+      } catch (err) {
+        console.log("Redis lock error:", err.message);
+        break; // Break and fall back to database reservation
       }
-      return null;
-    } else {
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
   }
+
+  // 2. Graceful Fallback: Directly reserve inventory in MongoDB if Redis is offline/unreachable
+  try {
+    const isReservation = await reservationInventory({
+      productId,
+      quantity,
+      cartId,
+    });
+
+    if (isReservation && isReservation.modifiedCount) {
+      return `db_lock_${productId}`;
+    }
+  } catch (err) {
+    console.error("reservationInventory error:", err.message);
+  }
+
+  return null;
 };
 
 const releaseLock = async (keyLock) => {
-  console.log('key ne', keyLock);
+  if (!keyLock || keyLock.startsWith("db_lock_")) return;
   try {
-    return await redisClient.del(keyLock)
+    if (redisClient && redisClient.status === "ready") {
+      return await redisClient.del(keyLock);
+    }
   } catch (error) {
-    console.log("error when delete Key", error);
-    
+    console.log("Error releasing Redis key:", error.message);
   }
 };
 

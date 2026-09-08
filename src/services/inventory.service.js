@@ -5,6 +5,7 @@ const {
     inventory
 } = require('../models/inventory.model')
 const { getProductById } = require('../models/repositories/cart_repo')
+const { isOwnedByShop } = require('./seller-ownership.service')
 
 class InventoryService{
     static async addStockToInventory({
@@ -15,6 +16,7 @@ class InventoryService{
     }){
         const product = await getProductById(productId)
         if(!product) throw new BadRequestError('Product does not exist!')
+        if(!isOwnedByShop(product, shopId)) throw new BadRequestError('Product does not belong to this shop')
         
         const query = {inven_shopId: shopId, inven_productId: productId},
         updateSet={
@@ -26,7 +28,7 @@ class InventoryService{
             }
         }, options = {upsert: true, new: true}
         
-        return await inventory.findByIdAndUpdate(query,updateSet,options)
+        return await inventory.findOneAndUpdate(query,updateSet,options)
     }
 }
 

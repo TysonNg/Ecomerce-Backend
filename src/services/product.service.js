@@ -59,7 +59,7 @@ class ProductFactory{
 
     static async findAllProducts({limit, sort= 'ctime',filter= {isPublished: true},page = 1}){
         return await findAllProducts({limit,sort,filter,page,
-            select: ['product_name', 'product_price','product_thumb', 'product_shop','product_slug','product_prevPrice']
+            select: ['product_name', 'product_price','product_thumb', 'product_shop','product_slug','product_prevPrice', 'product_ratingsAverage', 'product_ratingsAvenrage', 'product_reviewsCount']
         })
     }
 
@@ -67,7 +67,7 @@ class ProductFactory{
         limit, sort = 'ctime',category,page = 1
     })
     {
-        return await findProductsByCategory({limit,sort,category,page, select:['product_name', 'product_price','product_thumb','product_slug', 'product_shop', 'product_prevPrice']})
+        return await findProductsByCategory({limit,sort,category,page, select:['product_name', 'product_price','product_thumb','product_slug', 'product_shop', 'product_prevPrice', 'product_ratingsAverage', 'product_ratingsAvenrage', 'product_reviewsCount']})
 
     }
 
@@ -76,7 +76,7 @@ class ProductFactory{
     }
 
     static async hotDealProducts(){
-        return await product.find({isPublished: true,$expr: {$gt:["$product_prevPrice", "$product_price"]}}).sort({product_viewsCount: -1}).limit(6).select('product_name product_price product_thumb product_shop product_prevPrice product_slug')
+        return await product.find({isPublished: true,$expr: {$gt:["$product_prevPrice", "$product_price"]}}).sort({product_viewsCount: -1}).limit(6).select('product_name product_price product_thumb product_shop product_prevPrice product_slug product_ratingsAverage product_ratingsAvenrage product_reviewsCount')
 
     }
 

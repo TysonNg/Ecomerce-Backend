@@ -17,6 +17,23 @@ const { convertToObjectIdMongodb } = require("../utils")
 
 class CartService {
 
+    static mergeCartProducts(userProducts = [], guestProducts = []) {
+        const mergedProducts = new Map(
+            userProducts.map((product) => [product.productId, { ...product }])
+        )
+
+        guestProducts.forEach((product) => {
+            const existingProduct = mergedProducts.get(product.productId)
+            mergedProducts.set(product.productId, {
+                ...existingProduct,
+                ...product,
+                quantity: (existingProduct?.quantity ?? 0) + product.quantity,
+            })
+        })
+
+        return [...mergedProducts.values()]
+    }
+
 
     static async addToCart({
         userId, product = {}
