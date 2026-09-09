@@ -4,9 +4,7 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "scripts": {
-    "build": "echo 'Build complete'",
     "test": "node --test test/services/*.test.js",
-    "test:integration": "node --test test/admin.integration.test.js",
     "seed:admin": "node src/scripts/seed-admin.js",
     "migrate:legacy-shops": "node src/scripts/migrate-legacy-shop-owners.js",
     "start": "node server.js",

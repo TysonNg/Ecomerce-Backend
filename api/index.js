@@ -24,6 +24,13 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  return res.status(200).json({
+    status: "success",
+    message: "Ecommerce Backend API is running",
+  });
+});
+
 app.get('/getCookie', (req,res) => {
   console.log(req.cookies);
   res.send('check cookie')

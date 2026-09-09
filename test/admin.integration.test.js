@@ -5,8 +5,12 @@ const assert = require('node:assert/strict');
 const mongoose = require('mongoose');
 const express = require('express');
 const JWT = require('jsonwebtoken');
-const { generateKeyPairSync } = require('node:crypto');
-const { MongoMemoryReplSet } = require('mongodb-memory-server');
+let MongoMemoryReplSet;
+try {
+  ({ MongoMemoryReplSet } = require('mongodb-memory-server'));
+} catch (e) {
+  // mongodb-memory-server is optional and not installed in production
+}
 const User = require('../src/models/user.model');
 const Shop = require('../src/models/shop.model');
 const { keyTokenUserModel: KeyToken } = require('../src/models/keytokenuser.model');
