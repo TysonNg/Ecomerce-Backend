@@ -32,8 +32,10 @@ app.get('/getCookie', (req,res) => {
 
 //init db
 require("../src/dbs/init.mongodb.cjs");
-const { checkOverLoad } = require("../src/helpers/check.connect");
-checkOverLoad();
+if (!process.env.VERCEL) {
+  const { checkOverLoad } = require("../src/helpers/check.connect");
+  checkOverLoad();
+}
 
 //init router
 
