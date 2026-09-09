@@ -37,6 +37,54 @@ class ShopController {
     new OK({ message: 'Get current shop success', metadata: shop }).send(res);
   };
 
+  getPublicShopDetail = async (req, res) => {
+    const { idOrSlug } = req.params;
+    if (!idOrSlug) throw new BadRequestError('Shop identifier is required');
+
+    const isId = mongoose.isObjectIdOrHexString(idOrSlug);
+    const filter = isId ? { _id: idOrSlug } : { slug: idOrSlug.toLowerCase() };
+    const shop = await Shop.findOne({ ...filter, status: 'active' }).select('_id name slug logo description createdAt').lean();
+    if (!shop) throw new NotFoundError('Shop not found or inactive');
+
+    const { product } = require('../models/product.model');
+    const productCount = await product.countDocuments({ product_shop: shop._id, isPublished: true });
+
+    new OK({
+      message: 'Get public shop details success',
+      metadata: { ...shop, productCount },
+    }).send(res);
+  };
+
+  getAllPublicShops = async (req, res) => {
+    const { product } = require('../models/product.model');
+    const shops = await Shop.find({ status: 'active' })
+      .select('_id name slug logo description createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const enhancedShops = await Promise.all(
+      shops.map(async (shop) => {
+        const [productCount, sampleProducts] = await Promise.all([
+          product.countDocuments({ product_shop: shop._id, isPublished: true }),
+          product.find({ product_shop: shop._id, isPublished: true })
+            .select('_id product_name product_thumb product_slug product_price')
+            .limit(4)
+            .lean(),
+        ]);
+        return {
+          ...shop,
+          productCount,
+          sampleProducts,
+        };
+      })
+    );
+
+    new OK({
+      message: 'Get all public shops success',
+      metadata: enhancedShops,
+    }).send(res);
+  };
+
   reviewShop = (action) => async (req, res) => {
     if (!mongoose.isObjectIdOrHexString(req.params.shopId)) throw new BadRequestError('Invalid shop ID', 400);
     const session = await mongoose.startSession();

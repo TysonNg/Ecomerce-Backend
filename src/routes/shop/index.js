@@ -7,6 +7,11 @@ const shopController = require('../../controllers/shop.controller');
 
 const router = express.Router();
 
+// Public routes
+router.get('/public/all', asyncHandler(shopController.getAllPublicShops));
+router.get('/public/:idOrSlug', asyncHandler(shopController.getPublicShopDetail));
+
+// Authenticated routes
 router.use(authentication);
 router.post('', asyncHandler(shopController.createShop));
 router.get('/me', asyncHandler(shopController.getMyShop));

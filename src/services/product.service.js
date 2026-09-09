@@ -51,6 +51,47 @@ class ProductFactory{
         const query = {product_shop, isPublished: true}
         return await findAllPublishForShop({query,limit,skip})
     }
+
+    static async getProductsByShop({ idOrSlug, category, search, limit = 50, page = 1 }) {
+        const Shop = require('../models/shop.model');
+        const mongoose = require('mongoose');
+        const isId = mongoose.isObjectIdOrHexString(idOrSlug);
+        const shopFilter = isId ? { _id: idOrSlug } : { slug: idOrSlug.toLowerCase() };
+        const shop = await Shop.findOne({ ...shopFilter, status: 'active' }).select('_id name slug logo description createdAt').lean();
+        if (!shop) return { shop: null, products: [], categories: [], total: 0 };
+
+        const filter = {
+            product_shop: shop._id,
+            isPublished: true,
+        };
+        if (category && category !== 'all') {
+            filter.product_type = category;
+        }
+        if (search && search.trim()) {
+            filter.product_name = { $regex: search.trim(), $options: 'i' };
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+        const [products, total, categories] = await Promise.all([
+            product.find(filter)
+                .sort({ _id: -1 })
+                .skip(skip)
+                .limit(Number(limit))
+                .select(['product_name', 'product_price', 'product_thumb', 'product_slug', 'product_shop', 'product_prevPrice', 'product_type', 'product_ratingsAverage', 'product_ratingsAvenrage', 'product_reviewsCount'])
+                .lean(),
+            product.countDocuments(filter),
+            product.distinct('product_type', { product_shop: shop._id, isPublished: true }),
+        ]);
+
+        return {
+            shop,
+            products,
+            categories,
+            total,
+            page: Number(page),
+            limit: Number(limit),
+        };
+    }
     //END QUERY
 
     static async searchProducts({keySearch}){

@@ -46,7 +46,9 @@ const findProductsByCategory = async({limit,sort,category,page,select}) =>{
 
 //FIND PRODUCT
 const findProduct = async({product_id, unSelect})=>{
-    return await product.findByIdAndUpdate(product_id,{$inc: {product_viewsCount: 1}},{upsert: true,new: true}).select(unGetSelectData(unSelect))
+    return await product.findByIdAndUpdate(product_id,{$inc: {product_viewsCount: 1}},{upsert: true,new: true})
+      .populate('product_shop', '_id name slug logo description createdAt')
+      .select(unGetSelectData(unSelect))
 }
 
 //UPDATE PRODUCT

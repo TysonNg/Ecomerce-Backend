@@ -115,6 +115,19 @@ class ProductController {
       metadata: await ProductServices.hotDealProducts(
     )}).send(res);
   }
+
+  getProductsByShop = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Get list products by shop success!",
+      metadata: await ProductServices.getProductsByShop({
+        idOrSlug: req.params.idOrSlug,
+        category: req.query.category,
+        search: req.query.search,
+        page: req.query.page || 1,
+        limit: req.query.limit || 50,
+      }),
+    }).send(res);
+  };
   //END QUERY//
 
   

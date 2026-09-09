@@ -13,6 +13,7 @@ router.get('',asyncHandler(productController.getAllProducts))
 router.get('/viewsCount', asyncHandler(productController.getProductsByViewsCount))
 router.get('/hotDeals', asyncHandler(productController.getHotDealProducts))
 router.get('/categories', asyncHandler(productController.getAllProductsByCategory))
+router.get('/shop/:idOrSlug', asyncHandler(productController.getProductsByShop))
 router.get('/:product_id([0-9a-fA-F]{24})', asyncHandler(productController.getProduct))
 
 
