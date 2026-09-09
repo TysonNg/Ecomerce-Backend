@@ -2,8 +2,9 @@
   "name": "backend",
   "type": "commonjs",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "api/index.js",
   "scripts": {
+    "build": "echo 'Build complete'",
     "test": "node --test test/services/*.test.js",
     "test:integration": "node --test test/admin.integration.test.js",
     "seed:admin": "node src/scripts/seed-admin.js",
@@ -20,7 +21,6 @@
     "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
